@@ -85,6 +85,19 @@ const api = {
         }
     },
     
+    // Openverse Image Search
+    searchCarImages: async (make, model, year) => {
+        try {
+            const response = await fetch(
+                `${api.baseURL}/openverse/car-images?make=${make}&model=${model}&year=${year}`
+            );
+            return await response.json();
+        } catch (error) {
+            console.error('Image search error:', error);
+            throw error;
+        }
+    },
+
     // Favorites methods
     async saveFavorite(carId) {
         if (!this.isLoggedIn()) {
@@ -125,5 +138,22 @@ const api = {
             console.error('Get favorites error:', error);
             throw error;
         }
+    },
+
+    // Token Management
+    setToken(token) {
+        localStorage.setItem('token', token);
+    },
+
+    getToken() {
+        return localStorage.getItem('token');
+    },
+
+    clearToken() {
+        localStorage.removeItem('token');
     }
 };
+
+// Export for use in other scripts
+window.api = api;
+export default api;
