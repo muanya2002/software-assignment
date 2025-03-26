@@ -57,7 +57,7 @@ passport.use(new GoogleStrategy({
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         // Find or create user based on Google profile
-        const { User } = require('./models/userModel');
+        const { User } = require('./user-model.js');
         
         let user = await User.findOne({ 'oauth.googleId': profile.id });
         
@@ -85,7 +85,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
     try {
-        const { User } = require('./models/userModel');
+        const { User } = require('../user-model.js');
         const user = await User.findById(id);
         done(null, user);
     } catch (error) {
