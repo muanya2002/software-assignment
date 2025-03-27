@@ -1,6 +1,6 @@
 const openVerseService = require('../api service/openverse-api');
-const { Car } = require('../car-model');
-const { User } = require('../user-model');
+const { Car } = require('../models/car-model');
+const { User } = require('../models/user-model');
 
 // Search cars using OpenVerse
 exports.searchCars = async (req, res) => {

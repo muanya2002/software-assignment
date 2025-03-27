@@ -1,7 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const { verifyToken } = require('../controllers/auth-controller');
-const { Car} = require('../car-model');
+const { Car} = require('../models/car-model');
 const router = express.Router();
 
 const OPENVERSE_API_URL = 'https://api.openverse.engineering/v1';

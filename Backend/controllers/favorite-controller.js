@@ -1,5 +1,5 @@
-const { User } = require('../user-model');
-const { Car } = require('../car-model');
+const { User } = require('../models/user-model');
+const { Car } = require('../models/car-model');
 const openVerseService = require('../api service/openverse-api');
 
 // Get user favorites

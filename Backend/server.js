@@ -5,17 +5,17 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
 const dotenv = require('dotenv');
-const authRoutes = require('../Backend/routes/auth-route.js');
-const searchRoutes = require('../Backend/routes/search-routes.js');
-const favoritesRoutes = require('../Backend/routes/fav-routes.js');
+const authRoutes = require('./routes/auth-route.js');
+const searchRoutes = require('./routes/search-routes.js');
+const favoritesRoutes = require('./routes/fav-routes.js');
 
 // Load environment variables
 dotenv.config();
 
 // Import route handlers
-const authRoutes = require('../Backend/routes/auth-route.js');
-const carRoutes = require('../Backend/routes/car-route.js');
-const favoriteRoutes = require('../Backend/routes/fav-routes.js');
+const authRoutes = require('./routes/auth-route.js');
+const carRoutes = require('./routes/car-route.js');
+const favoriteRoutes = require('./routes/fav-routes.js');
 
 const app = express();
 // Start server
@@ -57,7 +57,7 @@ passport.use(new GoogleStrategy({
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         // Find or create user based on Google profile
-        const { User } = require('./user-model.js');
+        const { User } = require('./models/user-model.js');
         
         let user = await User.findOne({ 'oauth.googleId': profile.id });
         
@@ -85,7 +85,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
     try {
-        const { User } = require('./user-model.js');
+        const { User } = require('./models/user-model.js');
         const user = await User.findById(id);
         done(null, user);
     } catch (error) {
