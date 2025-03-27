@@ -2,6 +2,7 @@ const express = require('express');
 const passport = require('passport');
 const AuthController = require('../controllers/auth-controller');
 const router = express.Router();
+const openverseApi = require('./openverse-api');
 
 // Local Registration Route
 router.post('/register', AuthController.registerUser);
@@ -43,5 +44,8 @@ router.get('/profile', (req, res) => {
         }
     });
 });
+
+router.get('/openverse/search', openverseApi.search);
+router.get('/openverse/car/:id', openverseApi.getCarDetails);
 
 module.exports = router;
