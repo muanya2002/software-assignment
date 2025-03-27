@@ -53,9 +53,9 @@
         </div>
     </div>
 
-    <script src="./api-js.js"></script>
+    <script src="../javascript/api.js"></script>
     <script>
-        import { registerUser } from './auth-controller.js';
+        import { registerUser } from '../backend/controllers/auth-controller.js' ;
         document.addEventListener('DOMContentLoaded', () => {
             const registrationForm = document.getElementById('registrationForm');
             const oauthButton = document.getElementById('oauthButton');

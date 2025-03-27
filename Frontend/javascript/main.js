@@ -134,7 +134,7 @@ function initializeSidebar() {
                     break;
                 case 'Favorites':
                     if (api.isLoggedIn()) {
-                        window.location.href = './favourite-controller.js';
+                        window.location.href = '../pages/favorites.html';
                     } else {
                         window.location.href = '../pages/login.html';
                     }

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorites</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>My Favorites</h1>
+        <div class="user-section"></div>
+    </header>
+    
+    <main>
+        <div id="favoritesList"></div>
+    </main>
+
+    <script src="../javascript/api.js"></script>
+    <script>
+        async function loadFavorites() {
+            const favorites = await api.getFavorites();
+            const container = document.getElementById('favoritesList');
+            
+            if (favorites.length === 0) {
+                container.innerHTML = '<p>No favorite cars yet.</p>';
+                return;
+            }
+            
+            container.innerHTML = favorites.map(car => `
+                <div class="car-card">
+                    <h3>${car.make} ${car.model} (${car.year})</h3>
+                    <p>${car.description}</p>
+                    <img src="${car.imageUrl}" alt="Car Image">
+                </div>
+            `).join('');
+        }
+        loadFavorites();
+    </script>
+</body>
+</html>
