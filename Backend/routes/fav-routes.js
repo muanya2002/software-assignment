@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const favouriteController = require('../controllers/favorite-controller');
-const { verifyToken } = require('../controllers/auth-controller');
+const { verifyToken } = require('../controllers/auth-controller').default;
 
 
 // All favorites routes require authentication

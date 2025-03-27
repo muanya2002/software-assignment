@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const UserSchema = new mongoose.Schema({
+const UserSchema = new Schema({
     fullName: {
         type: String,
         required: true,
@@ -26,11 +26,11 @@ const UserSchema = new mongoose.Schema({
         sparse: true
     },
     favorites: [{
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'Car'
     }],
     searchHistory: [{
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'Car'
     }],
     createdAt: {
@@ -63,6 +63,6 @@ UserSchema.statics.findOrCreate = async function(profile) {
     return user;
 };
 
-const User = mongoose.model('User', UserSchema);
+const User = model('User', UserSchema);
 
-module.exports = User;
+export default User;

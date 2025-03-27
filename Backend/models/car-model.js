@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import { Schema, model as _model } from 'mongoose';
 
-const CarSchema = new mongoose.Schema({
+const CarSchema = new Schema({
     make: {
         type: String,
         required: true,
@@ -61,6 +61,6 @@ CarSchema.statics.searchCars = async function(filters) {
     return await this.find(query);
 };
 
-const Car = mongoose.model('Car', CarSchema);
+const Car = _model('Car', CarSchema);
 
-module.exports = Car;
+export default Car;

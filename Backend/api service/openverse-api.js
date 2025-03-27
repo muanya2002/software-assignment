@@ -1,16 +1,17 @@
-const express = require('express');
-const axios = require('axios');
-const { verifyToken } = require('../controllers/auth-controller');
-const { Car} = require('../models/car-model');
-const router = express.Router();
+import { Router } from 'express';
+import { create, post } from 'axios';
+import { verifyToken } from '../controllers/auth-controller';
+import { Car } from '../models/car-model';
+const router = Router();
 
-const OPENVERSE_API_URL = 'https://api.openverse.engineering/v1';
+import { JWT_SECRET, OPENVERSE_API_URL } from '../configuration/config';
+console.log(JWT_SECRET, OPENVERSE_API_URL);
 
 // Search for car images using OpenVerse
 
 class OpenVerseService {
     constructor() {
-        this.api = axios.create({
+        this.api = create({
             baseURL: OPENVERSE_API_URL,
             headers: { 'Accept': 'application/json' }
         });
@@ -19,7 +20,7 @@ class OpenVerseService {
 
     async getAccessToken() {
         try {
-            const response = await axios.post(`${OPENVERSE_API_URL}/auth_tokens/token/`, {
+            const response = await post(`${OPENVERSE_API_URL}/auth_tokens/token/`, {
                 client_id: 'YOUR_CLIENT_ID',
                 client_secret: 'YOUR_CLIENT_SECRET',
                 grant_type: 'client_credentials'
@@ -79,4 +80,4 @@ router.get('/cars/:id', verifyToken, async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

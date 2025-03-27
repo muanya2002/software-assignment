@@ -1,5 +1,5 @@
 const express = require('express');
-const Car = require('../models/car-model');
+const Car = require('../models/car-model').default;
 const router = express.Router();
 
 // Get all cars

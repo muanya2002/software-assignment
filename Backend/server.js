@@ -1,21 +1,24 @@
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const session = require('express-session');
-const dotenv = require('dotenv');
-const authRoutes = require('./routes/auth-route.js');
-const searchRoutes = require('./routes/search-routes.js');
-const favoritesRoutes = require('./routes/fav-routes.js');
+
+import express, { json, urlencoded } from 'express';
+import { static as serveStatic } from 'express';
+import cors from 'cors';
+import { connect } from 'mongoose';
+import { initialize, session as _session, use, serializeUser, deserializeUser } from 'passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import session from 'express-session';
+import { JWT_SECRET, OPENVERSE_API_URL } from '../Backend/configuration/config.js';
+console.log(JWT_SECRET, OPENVERSE_API_URL);
+import authRoutes from './routes/auth-route.js';
+import searchRoutes from './routes/search-routes.js';
+import favoritesRoutes from './routes/fav-routes.js';
 
 // Load environment variables
-dotenv.config();
+config();
 
 // Import route handlers
-const authRoutes = require('./routes/auth-route.js');
-const carRoutes = require('./routes/car-route.js');
-const favoriteRoutes = require('./routes/fav-routes.js');
+import authRoutes from './routes/auth-route.js';
+import carRoutes from './routes/car-route.js';
+import favoriteRoutes from './routes/fav-routes.js';
 
 const app = express();
 // Start server
@@ -25,8 +28,8 @@ app.listen(PORT, () => {
 
 // Middleware
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(json());
+app.use(urlencoded({ extended: true }));
 
 // Session setup
 app.use(session({
@@ -36,11 +39,11 @@ app.use(session({
 }));
 
 // Passport initialization
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(initialize());
+app.use(_session());
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/car-search', {
+connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/car-search', {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => {
@@ -50,14 +53,14 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/car-searc
 });
 
 // Passport Google OAuth strategy
-passport.use(new GoogleStrategy({
+use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: '/api/auth/oauth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         // Find or create user based on Google profile
-        const { User } = require('./models/user-model.js');
+        const { User } = require('./models/user-model.js').default;
         
         let user = await User.findOne({ 'oauth.googleId': profile.id });
         
@@ -79,13 +82,13 @@ passport.use(new GoogleStrategy({
 }));
 
 // Passport serialization
-passport.serializeUser((user, done) => {
+serializeUser((user, done) => {
     done(null, user.id);
 });
 
-passport.deserializeUser(async (id, done) => {
+deserializeUser(async (id, done) => {
     try {
-        const { User } = require('./models/user-model.js');
+        const { User } = require('./models/user-model.js').default;
         const user = await User.findById(id);
         done(null, user);
     } catch (error) {
@@ -98,8 +101,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/favorites', favoritesRoutes);
 
-// Static file serving from public directory
-app.use(express.static('public'));
+app.use(serveStatic('public'));
+app.use(serveStatic('public'));
 
 // Error handler middleware
 app.use((err, req, res, next) => {

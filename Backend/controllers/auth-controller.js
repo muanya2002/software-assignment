@@ -1,7 +1,7 @@
-const User = require('../models/user-model');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = require('./config');
+import User, { findOne } from '../models/user-model';
+import { genSalt, hash, compare } from 'bcryptjs';
+import { sign, verify } from 'jsonwebtoken';
+import { JWT_SECRET } from '../configuration/config';
 
 class AuthController {
     static async registerUser(req, res) {
@@ -9,7 +9,7 @@ class AuthController {
             const { fullName, email, password } = req.body;
 
             // Check if user already exists
-            const existingUser = await User.findOne({ email });
+            const existingUser = await findOne({ email });
             if (existingUser) {
                 return res.status(400).json({ 
                     success: false, 
@@ -18,8 +18,8 @@ class AuthController {
             }
 
             // Hash password
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
+            const salt = await genSalt(10);
+            const hashedPassword = await hash(password, salt);
 
             // Create new user
             const newUser = new User({
@@ -31,7 +31,7 @@ class AuthController {
             await newUser.save();
 
             // Generate JWT token
-            const token = jwt.sign(
+            const token = sign(
                 { userId: newUser._id, email: newUser.email },
                 process.env.JWT_SECRET,
                 { expiresIn: '1h' }
@@ -61,7 +61,7 @@ class AuthController {
             const { email, password } = req.body;
 
             // Find user
-            const user = await User.findOne({ email });
+            const user = await findOne({ email });
             if (!user) {
                 return res.status(400).json({ 
                     success: false, 
@@ -70,7 +70,7 @@ class AuthController {
             }
 
             // Check password
-            const isMatch = await bcrypt.compare(password, user.password);
+            const isMatch = await compare(password, user.password);
             if (!isMatch) {
                 return res.status(400).json({ 
                     success: false, 
@@ -79,7 +79,7 @@ class AuthController {
             }
 
             // Generate JWT token
-            const token = jwt.sign(
+            const token = sign(
                 { userId: user._id, email: user.email },
                 process.env.JWT_SECRET,
                 { expiresIn: '1h' }
@@ -116,7 +116,7 @@ class AuthController {
             }
 
             // Generate JWT token
-            const token = jwt.sign(
+            const token = sign(
                 { userId: req.user._id, email: req.user.email },
                 process.env.JWT_SECRET,
                 { expiresIn: '1h' }
@@ -142,17 +142,17 @@ class AuthController {
     }
 }
 
-exports.verifyToken = (req, res, next) => {
+export function verifyToken(req, res, next) {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'Access denied. No token provided.' });
 
     try {
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = verify(token, JWT_SECRET);
         req.user = decoded; // Attach user data to request
         next();
     } catch (error) {
         res.status(403).json({ error: 'Invalid token' });
     }
-};
+}
 
-module.exports = AuthController;
+export default AuthController;

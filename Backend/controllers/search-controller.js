@@ -1,9 +1,9 @@
-const openVerseService = require('../api service/openverse-api');
-const { Car } = require('../models/car-model');
-const { User } = require('../models/user-model');
+import { searchCars, getCarDetails } from '../api service/openverse-api';
+import { Car } from '../models/car-model';
+import { User } from '../models/user-model';
 
 // Search cars using OpenVerse
-exports.searchCars = async (req, res) => {
+export async function searchCars(req, res) {
     try {
         const { q, category, year, make, model } = req.query;
         
@@ -15,7 +15,7 @@ exports.searchCars = async (req, res) => {
         if (model) filters.model = model;
         
         // Get cars from OpenVerse API
-        const cars = await openVerseService.searchCars(q, filters);
+        const cars = await searchCars(q, filters);
         
         // If user is logged in, mark favorites
         if (req.user) {
@@ -38,15 +38,15 @@ exports.searchCars = async (req, res) => {
             message: 'Error searching for cars'
         });
     }
-};
+}
 
 // Get car details
-exports.getCarDetails = async (req, res) => {
+export async function getCarDetails(req, res) {
     try {
         const { id } = req.params;
         
         // Get car details from service
-        const car = await openVerseService.getCarDetails(id);
+        const car = await getCarDetails(id);
         
         // If user is logged in, check if car is favorited
         if (req.user) {
@@ -67,10 +67,10 @@ exports.getCarDetails = async (req, res) => {
             message: 'Car not found'
         });
     }
-};
+}
 
 // Search car makes and models for autocomplete
-exports.searchCarMakes = async (req, res) => {
+export async function searchCarMakes(req, res) {
     try {
         const { q } = req.query;
         
@@ -100,10 +100,10 @@ exports.searchCarMakes = async (req, res) => {
             message: 'Error retrieving car makes'
         });
     }
-};
+}
 
 // Get car categories
-exports.getCarCategories = async (req, res) => {
+export async function getCarCategories(req, res) {
     try {
         // Define car categories
         const categories = [
@@ -122,4 +122,4 @@ exports.getCarCategories = async (req, res) => {
             message: 'Error retrieving car categories'
         });
     }
-};
+}

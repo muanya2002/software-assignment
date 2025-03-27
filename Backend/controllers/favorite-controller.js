@@ -1,9 +1,9 @@
-const { User } = require('../models/user-model');
-const { Car } = require('../models/car-model');
-const openVerseService = require('../api service/openverse-api');
+import { User } from '../models/user-model';
+import { Car } from '../models/car-model';
+import { getCarDetails } from '../api service/openverse-api';
 
 // Get user favorites
-exports.getFavorites = async (req, res) => {
+export async function getFavorites(req, res) {
     try {
         // Get user with populated favorites
         const user = await User.findById(req.user._id).populate('favorites');
@@ -20,10 +20,10 @@ exports.getFavorites = async (req, res) => {
             message: 'Error retrieving favorites'
         });
     }
-};
+}
 
 // Add car to favorites
-exports.addFavorite = async (req, res) => {
+export async function addFavorite(req, res) {
     try {
         const { carId } = req.body;
         
@@ -32,7 +32,7 @@ exports.addFavorite = async (req, res) => {
         
         // If car doesn't exist in our DB yet, fetch and create it
         if (!car) {
-            const carDetails = await openVerseService.getCarDetails(carId);
+            const carDetails = await getCarDetails(carId);
             car = new Car(carDetails);
             await car.save();
         }
@@ -56,4 +56,4 @@ exports.addFavorite = async (req, res) => {
             message: 'Error adding car to favorites'
         });
     }
-};
+}

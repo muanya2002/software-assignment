@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
-const { User } = require('../models/user-model');
+import { verify } from 'jsonwebtoken';
+import { User } from '../models/user-model';
 
 /**
  * Middleware for optional authentication
@@ -11,7 +11,7 @@ const optionalAuth = async (req, res, next) => {
         
         if (token) {
             try {
-                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'car-search-jwt-secret');
+                const decoded = verify(token, process.env.JWT_SECRET || 'car-search-jwt-secret');
                 const user = await User.findById(decoded.userId);
                 
                 if (user) {
@@ -31,4 +31,4 @@ const optionalAuth = async (req, res, next) => {
     }
 };
 
-module.exports = optionalAuth;
+export default optionalAuth;
