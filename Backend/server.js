@@ -5,16 +5,17 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
 const dotenv = require('dotenv');
-const authRoutes = require('./routes/authRoutes');
-const searchRoutes = require('./routes/searchRoutes');
-const favoritesRoutes = require('./routes/favoritesRoutes');
+const authRoutes = require('../Backend/routes/auth-route.js');
+const searchRoutes = require('../Backend/routes/search-routes.js');
+const favoritesRoutes = require('../Backend/routes/');
 
 // Load environment variables
 dotenv.config();
 
 // Import route handlers
-const authRoutes = require('./routes/auth');
-const carRoutes = require('./routes/cars');
+const authRoutes = require('../Backend/routes/auth-route.js');
+const carRoutes = require('../Backend/routes/car-routes.js');
+const favoriteRoutes = require('../Backend/routes/fav-routes.js');
 const openverseRoutes = require('./routes/openverse');
 
 const app = express();
@@ -85,7 +86,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
     try {
-        const { User } = require('../user-model.js');
+        const { User } = require('./user-model.js');
         const user = await User.findById(id);
         done(null, user);
     } catch (error) {

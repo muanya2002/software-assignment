@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const searchController = require('../controllers/search-controller');
-const { verifyToken } = require('../controllers/authController');
-const optionalAuth = require('../middleware/optionalAuth');
+const { verifyToken } = require('../controllers/auth-controller');
+const optionalAuth = require('../middleware/auth-middleware');
 
 // Search cars (optional auth to mark favorites)
 router.get('/', optionalAuth, searchController.searchCars);
