@@ -1,4 +1,4 @@
-const openVerseService = require('../services/openVerseService');
+const openVerseService = require('../api service/openverse-api');
 const { Car } = require('../car-model');
 const { User } = require('../user-model');
 

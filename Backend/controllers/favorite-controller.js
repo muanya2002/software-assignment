@@ -1,6 +1,6 @@
 const { User } = require('../user-model');
 const { Car } = require('../car-model');
-const openVerseService = require('../services/openVerseService');
+const openVerseService = require('../api service/openverse-api');
 
 // Get user favorites
 exports.getFavorites = async (req, res) => {

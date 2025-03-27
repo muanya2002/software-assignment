@@ -2,7 +2,7 @@ const express = require('express');
 const passport = require('passport');
 const AuthController = require('../controllers/auth-controller');
 const router = express.Router();
-const openverseApi = require('./openverse-api');
+const openverseApi = require('../api service/openverse-api');
 
 // Local Registration Route
 router.post('/register', AuthController.registerUser);

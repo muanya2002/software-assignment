@@ -7,16 +7,15 @@ const session = require('express-session');
 const dotenv = require('dotenv');
 const authRoutes = require('../Backend/routes/auth-route.js');
 const searchRoutes = require('../Backend/routes/search-routes.js');
-const favoritesRoutes = require('../Backend/routes/');
+const favoritesRoutes = require('../Backend/routes/fav-routes.js');
 
 // Load environment variables
 dotenv.config();
 
 // Import route handlers
 const authRoutes = require('../Backend/routes/auth-route.js');
-const carRoutes = require('../Backend/routes/car-routes.js');
+const carRoutes = require('../Backend/routes/car-route.js');
 const favoriteRoutes = require('../Backend/routes/fav-routes.js');
-const openverseRoutes = require('./routes/openverse');
 
 const app = express();
 // Start server
