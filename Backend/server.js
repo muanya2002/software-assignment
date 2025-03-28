@@ -3,7 +3,7 @@ import express, { json, urlencoded } from 'express';
 import { static as serveStatic } from 'express';
 import cors from 'cors';
 import { connect } from 'mongoose';
-import { initialize, session as _session, use, serializeUser, deserializeUser } from 'passport';
+import passport, {passportConfig} from './configuration/passport.js';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import session from 'express-session';
 import { JWT_SECRET, OPENVERSE_API_URL } from '../Backend/configuration/config.js';
@@ -14,11 +14,6 @@ import favoritesRoutes from './routes/fav-routes.js';
 
 // Load environment variables
 config();
-
-// Import route handlers
-import authRoutes from './routes/auth-route.js';
-import carRoutes from './routes/car-route.js';
-import favoriteRoutes from './routes/fav-routes.js';
 
 const app = express();
 // Start server
@@ -39,8 +34,8 @@ app.use(session({
 }));
 
 // Passport initialization
-app.use(initialize());
-app.use(_session());
+app.use(passportConfig.initialize());
+app.use(passportConfig.session());
 
 // MongoDB connection
 connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/car-search', {

@@ -36,6 +36,18 @@ const UserSchema = new Schema({
     createdAt: {
         type: Date,
         default: Date.now
+    },
+    oauth: {
+        googleId: {
+            type: String,
+            unique: true,
+            sparse: true
+        },
+        provider: {
+            type: String,
+            enum: ['google'],
+            default: 'google'
+        }
     }
 }, {
     timestamps: true
