@@ -69,11 +69,17 @@ function updateAuthUI() {
 /**
  * Initialize sidebar functionality
  */
+function myFunction() {
+    console.log("Touched.");
+};
+
 function initializeSidebar() {
     const menuIcon = document.querySelector('.menu-icon');
     const sidebar = document.querySelector('.sidebar');
     const mainContent = document.querySelector('.main-content');
     const body = document.body;
+
+    console.log("Touched.");
     
     // Create overlay element for mobile
     const overlay = document.createElement('div');

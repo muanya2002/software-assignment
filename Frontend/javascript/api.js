@@ -15,7 +15,10 @@ const api = {
                 body: JSON.stringify({ fullName, email, password })
             });
             
-            return await response.json();
+            const data = await response.json();
+            if (data.success) {
+                localStorage.setItem('registeredEmail', email);
+            }
         } catch (error) {
             console.error('Registration error:', error);
             throw error;
@@ -156,4 +159,3 @@ const api = {
 
 // Export for use in other scripts
 window.api = api;
-export default api;
