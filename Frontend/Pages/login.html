@@ -47,7 +47,7 @@
 
     <script src="../javascript/api.js"></script>
     <script type="module">
-        import * as api from '../backend/controllers/auth-controller.js';
+        import { loginUser } from '../backend/controllers/auth-controller.js';
         document.addEventListener('DOMContentLoaded', () => {
             const loginForm = document.getElementById('loginForm');
             const oauthButton = document.getElementById('oauthButton');
