@@ -20,14 +20,14 @@
     --border-radius: 4px;
     --transition: all 0.3s ease;
   }
-  
+
   /* Reset */
   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
   }
-  
+
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
@@ -37,18 +37,18 @@
     display: flex;
     flex-direction: column;
   }
-  
+
   a {
     color: var(--primary-color);
     text-decoration: none;
     transition: var(--transition);
   }
-  
+
   a:hover {
     color: var(--primary-dark);
   }
 
-  
+
   /* Auth Form Container */
   .auth-container {
     flex: 1;
@@ -57,7 +57,7 @@
     align-items: center;
     padding: 20px;
   }
-  
+
   .auth-form-container {
     background-color: white;
     border-radius: var(--border-radius);
@@ -66,24 +66,24 @@
     max-width: 450px;
     padding: 30px;
   }
-  
+
   .auth-form-container h2 {
     text-align: center;
     margin-bottom: 25px;
     color: var(--text-color);
   }
-  
+
   /* Form Styles */
   .form-group {
     margin-bottom: 20px;
   }
-  
+
   .form-group label {
     display: block;
     margin-bottom: 8px;
     font-weight: 500;
   }
-  
+
   .form-group input {
     width: 100%;
     padding: 12px 15px;
@@ -92,13 +92,13 @@
     font-size: 1rem;
     transition: var(--transition);
   }
-  
+
   .form-group input:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
   }
-  
+
   /* Button Styles */
   .primary-button {
     width: 100%;
@@ -112,11 +112,11 @@
     cursor: pointer;
     transition: var(--transition);
   }
-  
+
   .primary-button:hover {
     background-color: var(--primary-dark);
   }
-  
+
   .oauth-button {
     width: 100%;
     padding: 12px;
@@ -132,15 +132,15 @@
     gap: 10px;
     transition: var(--transition);
   }
-  
+
   .oauth-button:hover {
     background-color: var(--background-color);
   }
-  
+
   .oauth-button i {
     color: var(--secondary-color);
   }
-  
+
   /* Separator */
   .auth-separator {
     display: flex;
@@ -149,18 +149,18 @@
     margin: 20px 0;
     color: var(--light-text);
   }
-  
+
   .auth-separator::before,
   .auth-separator::after {
     content: '';
     flex: 1;
     border-bottom: 1px solid var(--border-color);
   }
-  
+
   .auth-separator span {
     padding: 0 10px;
   }
-  
+
   /* Redirect Text */
   .auth-redirect {
     text-align: center;
@@ -168,7 +168,7 @@
     font-size: 0.95rem;
     color: var(--light-text);
   }
-  
+
   /* Alert styles */
   .alert {
     padding: 12px;
@@ -176,19 +176,19 @@
     border-radius: var(--border-radius);
     text-align: center;
   }
-  
+
   .alert-error {
     background-color: rgba(231, 76, 60, 0.1);
     color: var(--error-color);
     border: 1px solid rgba(231, 76, 60, 0.3);
   }
-  
+
   .alert-success {
     background-color: rgba(46, 204, 113, 0.1);
     color: var(--success-color);
     border: 1px solid rgba(46, 204, 113, 0.3);
   }
-  
+
   /* Media Queries for Responsive Design */
   /* Tablet */
   @media screen and (max-width: 768px) {
@@ -196,12 +196,12 @@
       max-width: 90%;
       padding: 25px;
     }
-    
+
     .logo {
       font-size: 1.6rem;
     }
   }
-  
+
   /* Mobile Phones */
   @media screen and (max-width: 480px) {
     .auth-form-container {
@@ -209,43 +209,43 @@
       padding: 20px;
       box-shadow: none;
     }
-    
+
     .header {
       padding: 10px 15px;
     }
-    
+
     .logo {
       font-size: 1.4rem;
     }
-    
+
     .form-group input,
     .primary-button,
     .oauth-button {
       padding: 10px;
     }
-    
+
     .auth-container {
       padding: 10px;
     }
   }
-  
+
   /* Very Small Devices */
   @media screen and (max-width: 320px) {
     .auth-form-container h2 {
       font-size: 1.4rem;
     }
-    
+
     .form-group label {
       font-size: 0.9rem;
     }
-    
+
     .form-group input,
     .primary-button,
     .oauth-button {
       font-size: 0.9rem;
     }
   }
-  
+
   /* Dark Mode - Optional, can be toggled with a class or media query */
   @media (prefers-color-scheme: dark) {
     :root {
@@ -257,22 +257,22 @@
       --background-color: #343a40;
       --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     }
-    
+
     body {
       background-color: #212529;
     }
-    
+
     .auth-form-container,
     .header {
       background-color: #343a40;
     }
-    
+
     .oauth-button {
       background-color: #495057;
       color: #f8f9fa;
       border-color: #6c757d;
     }
-    
+
     .oauth-button:hover {
       background-color: #343a40;
     }
@@ -378,11 +378,11 @@
   .sidebar {
     width: 200px;
   }
-  
+
   .main-content {
     margin-left: 200px;
   }
-  
+
   .main-content.expanded {
     margin-left: 64px;
   }
@@ -393,19 +393,19 @@
     transform: translateX(-100%);
     width: 240px;
   }
-  
+
   .sidebar.mobile-visible {
     transform: translateX(0);
   }
-  
+
   .main-content {
     margin-left: 0;
   }
-  
+
   .main-content.expanded {
     margin-left: 0;
   }
-  
+
   .overlay {
     display: none;
     position: fixed;
@@ -416,11 +416,11 @@
     background-color: rgba(0,0,0,0.5);
     z-index: 98;
   }
-  
+
   .overlay.active {
     display: block;
   }
-  
+
   .user-section {
     gap: 15px;
   }
@@ -430,21 +430,21 @@
   .header {
     padding: 0 10px;
   }
-  
+
   .logo {
     font-size: 18px;
   }
-  
+
   .sidebar {
     width: 85%;
     max-width: 300px;
   }
-  
+
   .dropdown-content {
     width: 220px;
     right: -50px;
   }
-  
+
   .dropdown-content:before {
     content: '';
     position: absolute;
@@ -454,7 +454,7 @@
     border-right: 8px solid transparent;
     border-bottom: 8px solid white;
   }
-  
+
   .user-section {
     gap: 10px;
   }
@@ -466,28 +466,28 @@
     background-color: #2a2a2a;
     box-shadow: 2px 0 5px rgba(0,0,0,0.3);
   }
-  
+
   .sidebar-item:hover {
     background-color: #3a3a3a;
   }
-  
+
   .dropdown-content {
     background-color: #2a2a2a;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   }
-  
+
   .dropdown-item:hover {
     background-color: #3a3a3a;
   }
-  
+
   .dropdown-item.logout:hover {
     background-color: rgba(231, 76, 60, 0.2);
   }
-  
+
   .user-info {
     border-bottom-color: #444;
   }
-  
+
   .overlay {
     background-color: rgba(0,0,0,0.7);
   }
@@ -633,9 +633,15 @@
     width: 100%;
     height: 200px;
     background-color: #f0f0f0;
-    display: flex;
+    display:flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+}
+.car-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .car-details {
@@ -728,12 +734,12 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         :root {
             --sidebar-width: 240px;
             --header-height: 56px;
         }
-        
+
         body {
             background-color: #f9f9f9;
         }
