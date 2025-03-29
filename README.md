@@ -18,7 +18,7 @@ cd carsearch-backend
 
 2. Install dependencies
 ```bash
-npm install
+npm install express mongoose dotenv cors body-parser morgan jsonwebtoken bcryptjs helmet express-rate-limit
 ```
 
 3. Configure Environment Variables
@@ -31,7 +31,9 @@ npm install
 
 4. Start the Development Server
 ```bash
-npm run dev
+node server.js
+or
+npx nodemon server.js
 ```
 
 ### API Endpoints
