@@ -3,42 +3,20 @@ import express, { json, urlencoded } from 'express';
 import { static as serveStatic } from 'express';
 import cors from 'cors';
 import { connect } from 'mongoose';
-import passport, {passportConfig} from './configuration/passport.js';
+import {passportConfig} from '../Backend/configuration/passport.js';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import session from 'express-session';
 import { JWT_SECRET, OPENVERSE_API_URL } from '../Backend/configuration/config.js';
 console.log(JWT_SECRET, OPENVERSE_API_URL);
-import authRoutes from './routes/auth-route.js';
-import searchRoutes from './routes/search-routes.js';
-import favoritesRoutes from './routes/fav-routes.js';
+import { config } from 'dotenv';
 
 // Load environment variables
 config();
 
 const app = express();
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
-
-// Middleware
-app.use(cors());
-app.use(json());
-app.use(urlencoded({ extended: true }));
-
-// Session setup
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'car-search-secret',
-    resave: false,
-    saveUninitialized: false
-}));
-
-// Passport initialization
-app.use(passportConfig.initialize());
-app.use(passportConfig.session());
 
 // MongoDB connection
-connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/car-search', {
+connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/carSearchDB', {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => {
@@ -48,16 +26,17 @@ connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/car-search', {
 });
 
 // Passport Google OAuth strategy
-use(new GoogleStrategy({
+passportConfig.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: '/api/auth/oauth/google/callback'
+    callbackURL: 'http:localhost:3000/auth/google/callback',
+    passReqToCallback: true
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         // Find or create user based on Google profile
         const { User } = require('./models/user-model.js').default;
         
-        let user = await User.findOne({ 'oauth.googleId': profile.id });
+         let user = await User.findOne({ 'oauth.googleId': profile.id });
         
         if (!user) {
             user = new User({
@@ -77,11 +56,11 @@ use(new GoogleStrategy({
 }));
 
 // Passport serialization
-serializeUser((user, done) => {
+passport.serializeUser((user, done) => {
     done(null, user.id);
 });
 
-deserializeUser(async (id, done) => {
+passport.deserializeUser(async (id, done) => {
     try {
         const { User } = require('./models/user-model.js').default;
         const user = await User.findById(id);
@@ -96,7 +75,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/favorites', favoritesRoutes);
 
-app.use(serveStatic('public'));
 app.use(serveStatic('public'));
 
 // Error handler middleware

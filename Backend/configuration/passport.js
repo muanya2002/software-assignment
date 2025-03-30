@@ -1,8 +1,8 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as LocalStrategy } from 'passport-local';
-import { compare } from 'bcryptjs';
-import { User } from '../models/user-model';
+import  compare  from 'bcryptjs';
+import  User  from '../models/user-model.js';
 
 // Serialize user for the session
 passport.serializeUser((user, done) => {
@@ -50,41 +50,18 @@ passport.use(new LocalStrategy(
     }
 ));
 
-// Google OAuth Strategy
-passport.use(new GoogleStrategy(
-    {
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: '/api/auth/oauth/google/callback',
-        passReqToCallback: true
-    },
-    async (req, accessToken, refreshToken, profile, done) => {
-        try {
-            // Find or create user based on Google profile
-            let user = await User.findOne({ 'oauth.googleId': profile.id });
-            
-            if (!user) {
-                // Create new user if not exists
-                user = new User({
-                    fullName: profile.displayName,
-                    email: profile.emails[0].value,
-                    oauth: {
-                        googleId: profile.id,
-                        provider: 'google'
-                    },
-                    // Optional: set a random password for OAuth users
-                    password: Math.random().toString(36).slice(-8)
-                });
-                
-                await user.save();
-            }
-            
-            return done(null, user);
-        } catch (error) {
-            return done(error);
-        }
-    }
-));
+//google strategy for authentication
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/auth/google/callback'
+}, 
+function (accessToken, refreshToken, profile, cb) {
+
+    User.findOrCreate({googleId: profile.id}, function (err, user){
+        return cb(err, user);
+    });
+}));
 
 // Additional helper functions
 export const passportConfig = {
