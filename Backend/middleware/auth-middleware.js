@@ -1,5 +1,5 @@
-import { verify } from 'jsonwebtoken';
-import { User } from '../models/user-model';
+import jwt from 'jsonwebtoken';
+import  User  from '../models/user-model.js';
 
 /**
  * Middleware for optional authentication
@@ -11,7 +11,7 @@ const optionalAuth = async (req, res, next) => {
         
         if (token) {
             try {
-                const decoded = verify(token, process.env.JWT_SECRET || 'car-search-jwt-secret');
+                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key');
                 const user = await User.findById(decoded.userId);
                 
                 if (user) {

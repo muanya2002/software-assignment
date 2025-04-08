@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Schema, model } from 'mongoose';
 
 const UserSchema = new Schema({
@@ -54,17 +55,13 @@ const UserSchema = new Schema({
 });
 
 // Add method to find or create user (for OAuth)
-UserSchema.statics.findOrCreate = async function(profile) {
-    const User = this;
-    let user = await User.findOne({ 
-        $or: [
+UserSchema.statics.findOrCreateByOAuth = async function(profile) {
+    let user = await this.findOne(
             { googleId: profile.googleId },
-            { email: profile.email }
-        ]
-    });
+    );
 
     if (!user) {
-        user = new User({
+        user = new this({
             fullName: profile.name,
             email: profile.email,
             googleId: profile.googleId
@@ -75,6 +72,5 @@ UserSchema.statics.findOrCreate = async function(profile) {
     return user;
 };
 
-const User = model('User', UserSchema);
-
+export const User = mongoose.model('User', UserSchema);
 export default User;
