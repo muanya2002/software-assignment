@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import * as searchController from '../controllers/search-controller.js';
+import optionalAuth from '../middleware/auth-middleware.js';
+
+
 const router = express.Router();
-const searchController = require('../controllers/search-controller');
-const { verifyToken } = require('../controllers/auth-controller').default;
-const optionalAuth = require('../middleware/auth-middleware').default;
 
 // Search cars (optional auth to mark favorites)
 router.get('/', optionalAuth, searchController.searchCars);
@@ -16,4 +17,4 @@ router.get('/makes', searchController.searchCarMakes);
 // Get car categories
 router.get('/categories', searchController.getCarCategories);
 
-module.exports = router;
+export default router;

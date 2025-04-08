@@ -7,7 +7,7 @@ const api = {
     // Authentication methods
     async registerUser(fullName, email, password) {
         try {
-            const response = await fetch(`${this.baseUrl}/auth/register`, {
+            const response = await fetch(this.baseUrl + '/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -19,6 +19,7 @@ const api = {
             if (data.success) {
                 localStorage.setItem('registeredEmail', email);
             }
+            return data;
         } catch (error) {
             console.error('Registration error:', error);
             throw error;
@@ -27,7 +28,7 @@ const api = {
     
     async loginUser(email, password) {
         try {
-            const response = await fetch(`${this.baseUrl}/auth/login`, {
+            const response = await fetch(this.baseUrl + '/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -48,7 +49,7 @@ const api = {
     },
     
     initiateOAuthLogin() {
-        window.location.href = `${this.baseUrl}/auth/oauth/google`;
+        window.location.href = this.baseUrl + '/auth/oauth/google';
     },
     
     isLoggedIn() {
@@ -64,8 +65,6 @@ const api = {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         window.location.href = "../pages/index.html";
-    
-
     },
     
     // Search methods
@@ -80,19 +79,38 @@ const api = {
                 if (value) queryParams.append(key, value);
             });
             
-            const response = await fetch(`${this.baseUrl}/search?${queryParams}`);
+            // Added error handling with timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+            
+            const response = await fetch(this.baseUrl + '/search?' + queryParams, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                },
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                throw new Error(`Search failed with status: ${response.status}`);
+            }
+            
             return await response.json();
         } catch (error) {
             console.error('Search error:', error);
-            throw error;
+            // Return empty results instead of throwing to prevent UI errors
+            return { success: false, cars: [] };
         }
     },
     
     // Openverse Image Search
-    searchCarImages: async (make, model, year) => {
+    async searchCarImages(make, model, year) {
         try {
+            // Fixed a typo in baseURL to baseUrl
             const response = await fetch(
-                `${api.baseURL}/openverse/car-images?make=${make}&model=${model}&year=${year}`
+                this.baseUrl + '/search/images?make=' + make + '&model=' + model + '&year=' + year
             );
             return await response.json();
         } catch (error) {
@@ -108,11 +126,11 @@ const api = {
         }
         
         try {
-            const response = await fetch(`${this.baseUrl}/favorites`, {
+            const response = await fetch(this.baseUrl + '/favorites', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
                 },
                 body: JSON.stringify({ carId })
             });
