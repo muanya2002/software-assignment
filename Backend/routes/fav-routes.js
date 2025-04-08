@@ -1,19 +1,20 @@
-const express = require('express');
-const router = express.Router();
-const favouriteController = require('../controllers/favorite-controller');
-const { verifyToken } = require('../controllers/auth-controller').default;
+import express from 'express';
+import { verifyToken } from '../controllers/auth-controller.js';
+import FavoriteController from '../controllers/favorite-controller.js';
 
+const router = express.Router();
+console.log(FavoriteController);
 
 // All favorites routes require authentication
 router.use(verifyToken);
 
 //to get favourites
-router.get('/favorites', verifyToken, favouriteController.getFavorites);
+router.get('/favorites', verifyToken, FavoriteController.getFavorites);
 
 //to add to favourites
-router.post('/favorites', verifyToken, favouriteController.addFavorite);
+router.post('/favorites', verifyToken, FavoriteController.addFavorite);
 
-//to delete from
-router.delete('/favorites/:carId', verifyToken, favouriteController.removeFavorite);
+router.delete('/favorites/:carId', verifyToken, FavoriteController.removeFavorite);
 
-module.exports = router;
+
+export default router;

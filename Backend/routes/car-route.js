@@ -1,5 +1,5 @@
-const express = require('express');
-const Car = require('../models/car-model').default;
+import express from 'express';
+import Car from '../models/car-model.js'; // Import Car model
 const router = express.Router();
 
 // Get all cars
@@ -54,7 +54,7 @@ router.post('/favorite', async (req, res) => {
     try {
         const { userId, carId } = req.body;
         
-        const user = await User.findById(userId);
+        const user = await user.findById(userId);
         if (!user) {
             return res.status(404).json({ 
                 success: false, 
@@ -87,4 +87,4 @@ router.post('/favorite', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;
