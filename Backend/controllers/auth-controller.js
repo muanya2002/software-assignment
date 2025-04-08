@@ -1,7 +1,23 @@
-import User, { findOne } from '../models/user-model';
-import { genSalt, hash, compare } from 'bcryptjs';
-import { sign, verify } from 'jsonwebtoken';
-import { JWT_SECRET } from '../configuration/config';
+import User  from '../models/user-model.js';
+import pkg from 'bcryptjs';
+const { hash, genSalt, compare } = pkg;
+import jwt from 'jsonwebtoken';
+
+import { JWT_SECRET } from '../configuration/config.js';
+
+
+export function verifyToken(req, res, next) {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'Access denied. No token provided.' });
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded; // Attach user data to request
+        next();
+    } catch (error) {
+        res.status(403).json({ error: 'Invalid token' });
+    }
+}
 
 class AuthController {
     static async registerUser(req, res) {
@@ -31,7 +47,7 @@ class AuthController {
             await newUser.save();
 
             // Generate JWT token
-            const token = sign(
+            const token = jwt.sign(
                 { userId: newUser._id, email: newUser.email },
                 process.env.JWT_SECRET,
                 { expiresIn: '1h' }
@@ -61,7 +77,7 @@ class AuthController {
             const { email, password } = req.body;
 
             // Find user
-            const user = await findOne({ email });
+            const user = await User.findOne({ email });
             if (!user) {
                 return res.status(400).json({ 
                     success: false, 
@@ -78,10 +94,11 @@ class AuthController {
                 });
             }
 
-            // Generate JWT token
-            const token = sign(
+            let token;
+if(this.loginUser)
+             token = jwt.sign(
                 { userId: user._id, email: user.email },
-                process.env.JWT_SECRET,
+                JWT_SECRET,
                 { expiresIn: '1h' }
             );
 
@@ -105,20 +122,12 @@ class AuthController {
     }
 
     static async googleOAuthLogin(req, res) {
-        try {
-            // Handle Google OAuth authentication
-            // This method would be called after successful passport authentication
-            if (!req.user) {
-                return res.status(401).json({ 
-                    success: false, 
-                    message: 'Authentication failed' 
-                });
-            }
+        const user = req.user;
 
             // Generate JWT token
-            const token = sign(
+             token = jwt.sign(
                 { userId: req.user._id, email: req.user.email },
-                process.env.JWT_SECRET,
+               JWT_SECRET,
                 { expiresIn: '1h' }
             );
 
@@ -140,19 +149,6 @@ class AuthController {
             });
         }
     }
-}
 
-export function verifyToken(req, res, next) {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) return res.status(401).json({ error: 'Access denied. No token provided.' });
-
-    try {
-        const decoded = verify(token, JWT_SECRET);
-        req.user = decoded; // Attach user data to request
-        next();
-    } catch (error) {
-        res.status(403).json({ error: 'Invalid token' });
-    }
-}
 
 export default AuthController;

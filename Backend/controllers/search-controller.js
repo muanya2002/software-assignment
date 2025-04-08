@@ -1,8 +1,9 @@
-import { searchCars, getCarDetails } from '../api service/openverse-api';
-import { Car } from '../models/car-model';
-import { User } from '../models/user-model';
+import openVerseService from '../routes/openverse-routes.js';
+import  Car  from '../models/car-model.js';
+import  User  from '../models/user-model.js';
 
-// Search cars using OpenVerse
+
+    // Search cars using OpenVerse
 export async function searchCars(req, res) {
     try {
         const { q, category, year, make, model } = req.query;
@@ -15,7 +16,7 @@ export async function searchCars(req, res) {
         if (model) filters.model = model;
         
         // Get cars from OpenVerse API
-        const cars = await searchCars(q, filters);
+        const cars = await fetchCars(q, filters);
         
         // If user is logged in, mark favorites
         if (req.user) {
@@ -25,28 +26,30 @@ export async function searchCars(req, res) {
             cars.forEach(car => {
                 car.isFavorite = favoriteIds.includes(car.openVerseId);
             });
+            }
+            
+            res.status(200).json({
+                success: true,
+                cars: cars
+            });
+        } 
+        // Catch block for error handling
+        catch (error) {
+            console.error('Search cars error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error searching for cars'
+            });
         }
-        
-        res.status(200).json({
-            success: true,
-            cars: cars
-        });
-    } catch (error) {
-        console.error('Search error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error searching for cars'
-        });
     }
-}
 
 // Get car details
-export async function getCarDetails(req, res) {
+ export async function getCarDetails(req, res) {
     try {
         const { id } = req.params;
         
         // Get car details from service
-        const car = await getCarDetails(id);
+        const car = await getCarById(id);
         
         // If user is logged in, check if car is favorited
         if (req.user) {
@@ -69,8 +72,9 @@ export async function getCarDetails(req, res) {
     }
 }
 
+
 // Search car makes and models for autocomplete
-export async function searchCarMakes(req, res) {
+ export async function searchCarMakes(req, res) {
     try {
         const { q } = req.query;
         
@@ -103,7 +107,7 @@ export async function searchCarMakes(req, res) {
 }
 
 // Get car categories
-export async function getCarCategories(req, res) {
+ export async function getCarCategories(req, res) {
     try {
         // Define car categories
         const categories = [
@@ -123,3 +127,4 @@ export async function getCarCategories(req, res) {
         });
     }
 }
+
