@@ -1,19 +1,39 @@
-
-import express, { json, urlencoded } from 'express';
-import { static as serveStatic } from 'express';
+import express from 'express';
 import cors from 'cors';
 import { connect } from 'mongoose';
-import {passportConfig} from '../Backend/configuration/passport.js';
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import session from 'express-session';
-import { JWT_SECRET, OPENVERSE_API_URL } from '../Backend/configuration/config.js';
-console.log(JWT_SECRET, OPENVERSE_API_URL);
+import { Strategy as GoogleStrategy } from 'passport-local';
+import passport from 'passport'; // Missing import
 import { config } from 'dotenv';
+import { JWT_SECRET, OPENVERSE_API_URL } from './configuration/config.js';
+import { passportConfig } from './configuration/passport.js';
+
+// Import routes
+import authRoutes from './routes/auth-route.js'; // Make sure to add correct paths
+import searchRoutes from './routes/search-routes.js'; // Changed to correct file path
+import favoritesRoutes from './routes/fav-routes.js'; // Make sure to add correct paths
+import openverseRoutes from './routes/openverse-routes.js'; // Added Openverse routes
 
 // Load environment variables
 config();
 
 const app = express();
+
+// Middleware setup (missing in original)
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Session setup
+app.use(session({
+  secret: JWT_SECRET || 'your_secret_key',
+  resave: false,
+  saveUninitialized: false
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // MongoDB connection
 connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/carSearchDB', {
@@ -25,18 +45,18 @@ connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/carSearchDB', {
     console.error('MongoDB connection error:', err);
 });
 
-// Passport Google OAuth strategy
-passportConfig.use(new GoogleStrategy({
+// Passport Google OAuth strategy configuration
+passportConfig.use( new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: 'http:localhost:3000/auth/google/callback',
+    callbackURL: 'http://localhost:3000/auth/google/callback', // Fixed URL (was missing ":")
     passReqToCallback: true
-}, async (accessToken, refreshToken, profile, done) => {
+}, async (req, accessToken, refreshToken, profile, done) => { // Fixed missing req parameter
     try {
         // Find or create user based on Google profile
-        const { User } = require('./models/user-model.js').default;
+        const { User } = require('./models/user-model.js');
         
-         let user = await User.findOne({ 'oauth.googleId': profile.id });
+        let user = await User.findOne({ 'oauth.googleId': profile.id });
         
         if (!user) {
             user = new User({
@@ -62,7 +82,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
     try {
-        const { User } = require('./models/user-model.js').default;
+        const { User } = require('./models/user-model.js');
         const user = await User.findById(id);
         done(null, user);
     } catch (error) {
@@ -75,7 +95,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/favorites', favoritesRoutes);
 
-app.use(serveStatic('public'));
+// Serve static files
+app.use(express.static('public'));
 
 // Error handler middleware
 app.use((err, req, res, next) => {
