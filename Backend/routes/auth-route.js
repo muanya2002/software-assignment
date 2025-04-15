@@ -9,6 +9,9 @@ const router = express.Router();
 import User from '../models/user-model.js';
 import passport from 'passport';
 
+//register route
+router.post('/register',AuthController.registerUser);
+
 // Login route
 router.post('/login', async (req, res) => {
   try {
@@ -24,7 +27,7 @@ router.post('/login', async (req, res) => {
     }
     
     // Check password
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ 
         success: false, 
@@ -66,7 +69,8 @@ router.post('/login', async (req, res) => {
 });
 
 // Google OAuth login route
-router.get('/auth/google', passport.authenticate('google', {
+router.get('/auth/google', 
+  passport.authenticate('google', {
   // This will be handled by Passport middleware
 scope:['profile' , 'email']
 }));
