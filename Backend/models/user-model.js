@@ -61,12 +61,11 @@ UserSchema.statics.findOrCreateByOAuth = async function(profile) {
     );
 
     if (!user) {
-        user = new this({
+        user = new this.create({
             fullName: profile.name,
             email: profile.email,
             googleId: profile.googleId
         });
-        await user.save();
     }
 
     return user;

@@ -1,11 +1,10 @@
-import User  from '../models/user-model.js';
-import pkg from 'bcryptjs';
+import User from '../models/user-model.js';
+import pkg from 'bcrypt';
 const { hash, genSalt, compare } = pkg;
 import jwt from 'jsonwebtoken';
-
+import dotenv from 'dotenv';
 import { JWT_SECRET } from '../configuration/config.js';
-
-
+dotenv.config();
 export function verifyToken(req, res, next) {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'Access denied. No token provided.' });
@@ -25,7 +24,7 @@ class AuthController {
             const { fullName, email, password } = req.body;
 
             // Check if user already exists
-            const existingUser = await findOne({ email });
+            const existingUser = await User.findOne({ email });
             if (existingUser) {
                 return res.status(400).json({ 
                     success: false, 
@@ -65,7 +64,7 @@ class AuthController {
             });
         } catch (error) {
             console.error('Registration error:', error);
-            res.status(500).json({ 
+           return res.status(500).json({ 
                 success: false, 
                 message: 'Server error during registration' 
             });
@@ -94,14 +93,11 @@ class AuthController {
                 });
             }
 
-            let token;
-if(this.loginUser)
-             token = jwt.sign(
-                { userId: user._id, email: user.email },
-                JWT_SECRET,
-                { expiresIn: '1h' }
-            );
-
+        const token = jwt.sign(
+            { userId: user_id, email: user.email },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
             res.json({
                 success: true,
                 message: 'Login successful',
@@ -122,33 +118,31 @@ if(this.loginUser)
     }
 
     static async googleOAuthLogin(req, res) {
-        const user = req.user;
-
-            // Generate JWT token
-             token = jwt.sign(
-                { userId: req.user._id, email: req.user.email },
-               JWT_SECRET,
-                { expiresIn: '1h' }
-            );
-
-            res.json({
-                success: true,
-                message: 'Google OAuth login successful',
-                token,
-                user: {
-                    id: req.user._id,
-                    fullName: req.user.fullName,
-                    email: req.user.email
-                }
-            });
-        } catch (error) {
-            console.error('Google OAuth login error:', error);
-            res.status(500).json({ 
+   
+        if (!req.user) {
+            return res.status(401).json({ 
                 success: false, 
-                message: 'Server error during OAuth login' 
+                message: 'Google login failed' 
             });
         }
-    }
+        const user = req.user;
 
+        const token = jwt.sign(
+          { userId: user._id, email: user.email },
+          process.env.JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+    
+        // ✅ Redirect to your frontend with user info and token
+        res.redirect(`http://127.0.0.1:5500/Frontend/pages/index.html?token=${token}&userId=${user._id}`);
+      } catch (error) {
+        console.error('Google OAuth login error:', error);
+        res.status(500).json({
+          success: false,
+          message: 'Server error during OAuth login',
+        });
+      
+    }
+}
 
 export default AuthController;
