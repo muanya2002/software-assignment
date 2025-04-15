@@ -29,19 +29,19 @@ function updateAuthUI() {
         if (isLoggedIn) {
             const user = api.getUser();
             userSection.innerHTML = `
-                <i class="fas fa-bell"></i>
-                <div class="user-dropdown">
-                    <div class="user-avatar">
-                        <i class="fas fa-user-circle"></i>
-                    </div>
-                    <div class="dropdown-content">
-                        <div class="user-info">
-                            <div class="user-name">${user.fullName}</div>
-                            <div class="user-email">${user.email}</div>
+                    <div class="user-dropdown">
+                        <div class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
                         </div>
-                        <div class="dropdown-item">My Favorites</div>
-                        <div class="dropdown-item">Profile Settings</div>
-                        <div class="dropdown-item logout">Logout</div>
+                        <div class="dropdown-content">
+                            <div class="user-info">
+                                <div class="user-name">${user.fullName}</div>
+                                <div class="user-email">${user.email}</div>
+                            </div>
+                            <div class="dropdown-item">My Favorites</div>
+                            <div class="dropdown-item">Profile Settings</div>
+                            <div class="dropdown-item logout">Logout</div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -140,7 +140,7 @@ function initializeSidebar() {
                     break;
                 case 'Favorites':
                     if (api.isLoggedIn()) {
-                        window.location.href = '../pages/favorites.html';
+                        window.location.href = '../pages/favourite.html';
                     } else {
                         window.location.href = '../pages/login.html';
                     }
@@ -170,6 +170,14 @@ function initializeSidebar() {
                }
            });
            
+           if (window.innerWidth > 768) {
+            userDropdown.addEventListener('mouseenter', () => {
+                dropdownContent.classList.add('show');
+            });
+            userDropdown.addEventListener('mouseleave', () => {
+                dropdownContent.classList.remove('show');
+            });
+        }
            // Close dropdown when clicking elsewhere
            document.addEventListener('click', () => {
                if (window.innerWidth <= 768) {

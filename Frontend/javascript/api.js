@@ -3,11 +3,13 @@
  */
 const api = {
     baseUrl: 'http://localhost:3000/api',
+
     
     // Authentication methods
     async registerUser(fullName, email, password) {
         try {
-            const response = await fetch(this.baseUrl + '/auth/register', {
+            const response = await fetch(`${this.baseUrl}/auth/register`, {
+
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -16,8 +18,11 @@ const api = {
             });
             
             const data = await response.json();
-            if (data.success) {
+            if (data.success && data.token) {
                 localStorage.setItem('registeredEmail', email);
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                window.location.href = "../pages/index.html";
             }
             return data;
         } catch (error) {
@@ -28,7 +33,7 @@ const api = {
     
     async loginUser(email, password) {
         try {
-            const response = await fetch(this.baseUrl + '/auth/login', {
+            const response = await fetch(`${this.baseUrl}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -37,9 +42,10 @@ const api = {
             });
             
             const data = await response.json();
-            if (data.token) {
+            if (data.token && data.success) {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
+                window.location.href = "../pages/index.html";
             }
             return data;
         } catch (error) {
@@ -49,7 +55,7 @@ const api = {
     },
     
     initiateOAuthLogin() {
-        window.location.href = this.baseUrl + '/auth/oauth/google';
+        window.location.href = `http://localhost:3000/auth/google`;
     },
     
     isLoggedIn() {
@@ -65,101 +71,153 @@ const api = {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         window.location.href = "../pages/index.html";
+    
+
     },
     
     // Search methods
-    async searchCars(query, filters = {}) {
-        try {
-            const queryParams = new URLSearchParams();
-            
-            if (query) queryParams.append('q', query);
-            
-            // Add filters to query params
-            Object.entries(filters).forEach(([key, value]) => {
-                if (value) queryParams.append(key, value);
-            });
-            
-            // Added error handling with timeout
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-            
-            const response = await fetch(this.baseUrl + '/search?' + queryParams, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                },
-                signal: controller.signal
-            });
-            
-            clearTimeout(timeoutId);
-            
-            if (!response.ok) {
-                throw new Error(`Search failed with status: ${response.status}`);
-            }
-            
-            return await response.json();
-        } catch (error) {
-            console.error('Search error:', error);
-            // Return empty results instead of throwing to prevent UI errors
-            return { success: false, cars: [] };
-        }
-    },
-    
-    // Openverse Image Search
-    async searchCarImages(make, model, year) {
-        try {
-            // Fixed a typo in baseURL to baseUrl
-            const response = await fetch(
-                this.baseUrl + '/search/images?make=' + make + '&model=' + model + '&year=' + year
-            );
-            return await response.json();
-        } catch (error) {
-            console.error('Image search error:', error);
-            throw error;
-        }
-    },
+    async searchCars(query = '', filters = {}) {
+      try {
+        // Build query string
+        const queryParams = new URLSearchParams();
+        if (query) queryParams.append('q', query);
+        
+        // Add filters to query params
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value) queryParams.append(key, value);
+        });
 
-    // Favorites methods
-    async saveFavorite(carId) {
-        if (!this.isLoggedIn()) {
-            throw new Error('You must be logged in to save favorites');
+// Add auth token if logged in
+const headers = {};
+if (this.isLoggedIn()) {
+    headers['Authorization'] = `Bearer ${this.getToken()}`;
+}
+
+const response = await fetch(`${this.baseUrl}/search?${queryParams}`, {
+    headers
+});
+
+return await response.json();
+} catch (error) {
+console.error('Search error:', error);
+throw error;
+}
+},
+  
+  // Openverse Car Image Search - CORRECTED
+  async searchCarImages(query) {
+    try {
+        const encodedQuery = encodeURIComponent(query);
+        console.log(`Searching for car images with query: ${encodedQuery}`);
+        
+        // Use the correct endpoint that matches your backend
+        const response = await fetch(`${this.baseUrl}/openverse/search?query=${encodedQuery}`);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API error (${response.status}): ${errorText}`);
         }
         
+        const data = await response.json();
+        console.log('Search results:', data);
+        return data;
+    } catch (error) {
+        console.error('Image search error:', error);
+        throw error;
+    }
+},
+  
+  // Get specific car image details
+  async getCarImageDetails(id) {
+      try {
+        const headers = {};
+        if (this.isLoggedIn()) {
+            headers['Authorization'] = `Bearer ${this.getToken()}`;
+        }
+        
+        // Use the correct endpoint
+        const response = await fetch(`${this.baseUrl}/openverse/cars/${id}`, { headers });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || errorData.message || 'Failed to get car image details');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Get car image details error:', error);
+        throw error;
+    }
+},
+
+  // Favorites methods
+  async saveFavorite(carId) {
+      if (!this.isLoggedIn()) {
+          throw new Error('You must be logged in to save favorites');
+      }
+      
+      try {
+          const response = await fetch('http://127.0.0.1:5500/Frontend/pages/favourite.html', {
+              body: JSON.stringify({ carId })
+          });
+          
+          return await response.json();
+      } catch (error) {
+          console.error('Save favorite error:', error);
+          throw error;
+      }
+  },
+  
+  async getFavorites() {
+      if (!this.isLoggedIn()) {
+          return {success: true, favorites: [] };
+      }
+      
+      try {
+          const response = await fetch('http://127.0.0.1:5500/Frontend/pages/favourite.html', {
+            body: JSON.stringify({ carId})
+          });
+          
+          return await response.json();
+      } catch (error) {
+          console.error('Get favorites error:', error);
+          throw error;
+      }
+  },
+    
+      
+      async addFavorite(carId) {
+        if (!this.isLoggedIn()) {
+          throw new Error('User must be logged in to add favorites');
+        }
         try {
-            const response = await fetch(this.baseUrl + '/favorites', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
-                },
+            const response = await fetch('http://127.0.0.1:5500/Frontend/pages/favourite.html', {
                 body: JSON.stringify({ carId })
             });
             
             return await response.json();
         } catch (error) {
-            console.error('Save favorite error:', error);
+            console.error('Add favorite error:', error);
             throw error;
         }
     },
     
-    async getFavorites() {
-        if (!this.isLoggedIn()) {
-            return [];
-        }
-        
+      // Car details
+      async getCarDetails(carId) {
         try {
-            const response = await fetch(`${this.baseUrl}/favorites`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
+            const headers = {};
+            if (this.isLoggedIn()) {
+                headers['Authorization'] = `Bearer ${this.getToken()}`;
+            }
             
+            const response = await fetch(`${this.baseUrl}/search/cars/${carId}`, { headers });
             return await response.json();
         } catch (error) {
-            console.error('Get favorites error:', error);
+            console.error('Get car details error:', error);
             throw error;
         }
     },
+
 
     // Token Management
     setToken(token) {

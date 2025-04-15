@@ -1,7 +1,7 @@
 import express from 'express';
 import * as searchController from '../controllers/search-controller.js';
 import optionalAuth from '../middleware/auth-middleware.js';
-
+import axios from 'axios';
 
 const router = express.Router();
 

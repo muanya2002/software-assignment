@@ -11,12 +11,11 @@ export async function searchCars(req, res) {
         // Create filters object
         const filters = {};
         if (category) filters.category = category;
-        if (year) filters.year = year;
-        if (make) filters.make = make;
         if (model) filters.model = model;
         
         // Get cars from OpenVerse API
-        const cars = await fetchCars(q, filters);
+        const results = await openVerseService.searchCars(q, filters);
+        const cars = results.cars || [];
         
         // If user is logged in, mark favorites
         if (req.user) {
@@ -49,7 +48,7 @@ export async function searchCars(req, res) {
         const { id } = req.params;
         
         // Get car details from service
-        const car = await getCarById(id);
+        const car = await openVerseService.getCarDetails(id);
         
         // If user is logged in, check if car is favorited
         if (req.user) {

@@ -18,7 +18,14 @@ class SearchHandler {
   bindEvents() {
       // Search button click
       if (this.searchButton) {
-          this.searchButton.addEventListener('click', () => this.performSearch());
+          this.searchButton.addEventListener('click', () => {
+              const query = this.searchInput.value.trim();
+              api.searchCarImages(query)
+              .then(results => this.displayResults(results))
+                  .catch(error => {
+                    console.error('Search failed:', error);
+                  });
+          });
       }
       
       // Search input enter key
@@ -64,19 +71,13 @@ class SearchHandler {
           return;
       }
       
-      // Convert UI filters to API format
-      const filters = {};
-      if (this.activeFilters.category && this.activeFilters.category !== 'All Cars') {
-          filters.category = this.activeFilters.category;
-      }
-      
       // Show loading state
       this.resultsContainer.innerHTML = '<div class="loading">Searching for cars...</div>';
       
       try {
           // Add error handling and timeout
           const results = await Promise.race([
-              api.searchCars(query, filters),
+              api.searchCarImages(query, this.activeFilters),
               new Promise((_, reject) => 
                   setTimeout(() => reject(new Error('Search timeout')), 15000)
               )
@@ -99,7 +100,7 @@ class SearchHandler {
       if (!this.resultsContainer) return;
       
       // Handle API error or no results
-      if (!results || !results.cars || results.cars.length === 0) {
+      if (!results || !results.success || !results.cars || results.cars.length === 0) {
           this.resultsContainer.innerHTML = `
               <div class="no-results">
                   <i class="fas fa-car-side"></i>
@@ -112,8 +113,10 @@ class SearchHandler {
       this.resultsContainer.innerHTML = '';
       
       results.cars.forEach(car => {
-          const carCard = document.createElement('div');
-          carCard.className = 'car-card';
+          const carResults = document.createElement('div');
+          carResults.className = 'section-title';
+          document.getElementById('searchResults')?.scrollIntoView({ behavior: 'smooth' });
+
           
           const isFavorite = api.isLoggedIn() && car.isFavorite;
           const favoriteIcon = isFavorite ? 
@@ -123,19 +126,18 @@ class SearchHandler {
           // Ensure there's a fallback image URL
           const imageUrl = car.imageUrl || car.thumbnail || '/images/car-placeholder.jpg';
           
-          carCard.innerHTML = `
+          carResults.innerHTML = `
               <div class="car-image">
                   <img src="${imageUrl}" alt="${car.make} ${car.model}" onerror="this.src='/images/car-placeholder.jpg'">
                   ${favoriteIcon}
               </div>
               <div class="car-details">
-                  <div class="car-title">${car.make} ${car.model} ${car.year || ''}</div>
-                  <div class="car-info">${car.category || 'Car'} • ${car.transmission || 'N/A'} • ${car.price ? '$' + car.price.toLocaleString() : 'Price N/A'}</div>
+                  <div class="car-title"></div>
               </div>
           `;
           
           // Add favorite functionality
-          const favoriteIconEl = carCard.querySelector('.favorite-icon');
+          const favoriteIconEl = carResults.querySelector('.favorite-icon');
           if (favoriteIconEl) {
               favoriteIconEl.addEventListener('click', async (e) => {
                   e.stopPropagation();
@@ -155,12 +157,12 @@ class SearchHandler {
           }
           
           // Make entire card clickable for car details
-          carCard.addEventListener('click', () => {
+          carResults.addEventListener('click', () => {
               // Navigate to car details page
               window.location.href = `car.html?id=${car.id}`;
           });
           
-          this.resultsContainer.appendChild(carCard);
+          this.resultsContainer.appendChild(carResults);
       });
   }
 }
