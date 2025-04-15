@@ -8,6 +8,23 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
 </head>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const userId = params.get('userId');
+    const fullName = params.get('fullName');
+    const email = params.get('email');
+  
+    if (token && userId) {
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify({ id: UserId, fullName, email }));
+  
+      // Clear URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  </script>
+
 <body>
     <!-- Header -->
     <header class="header">
@@ -35,9 +52,13 @@
             <i class="fas fa-home"></i>
             <span>Home</span>
         </div>
-        <div class="sidebar-item">
-            <i class="fas fa-heart"></i>
-            <span>Favorites</span>
+        <div>
+        
+            <div class="sidebar-item">
+              <i class="fas fa-heart"><a  href="./favourite.html"> </a></i>
+              <span>Favorites</span>
+            </div>
+          
         </div>
         <div class="sidebar-item">
             <i class="fas fa-history"></i>
@@ -104,8 +125,22 @@
         </div>
     </div>
 </div>
+<h2 class="section-title">Search Results</h2>
+<div id="carResults"></div>
+
 </main>
 <script src="../javascript/api.js"></script>
 <script src="../javascript/search.js"></script>
 <script src="../javascript/main.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const isLoggedIn = api.isLoggedIn();
+      const favoritesLink = document.getElementById('favoritesLink');
+  
+      if (isLoggedIn && favoritesLink) {
+        favoritesLink.style.display = 'block';
+      }
+    });
+  </script>
+  
 </html>
