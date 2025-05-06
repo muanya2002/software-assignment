@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Favorites</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <header>
@@ -16,24 +16,45 @@
         <div id="favoritesList"></div>
     </main>
 
-    <script src="../javascript/api.js"></script>
+    <script src="/javascript/search.js"></script>
+    <script src="/javascript/api.js"></script>
     <script>
+        if (!api.isLoggedIn()) {
+            alert('Please log in to view favorites.');
+            window.location.href = './login.html';
+        }        
         async function loadFavorites() {
-            const favorites = await api.getFavorites();
             const container = document.getElementById('favoritesList');
-            
+            container.innerHTML = '<p>Loading...</p>';
+
+            try {
+                const favorites = await api.getFavorites();
             if (favorites.length === 0) {
                 container.innerHTML = '<p>No favorite cars yet.</p>';
                 return;
             }
             
             container.innerHTML = favorites.map(car => `
-                <div class="car-card">
-                    <h3>${car.make} ${car.model} (${car.year})</h3>
+                <div class="carResults">
                     <p>${car.description}</p>
                     <img src="${car.imageUrl}" alt="Car Image">
+                    <button onclick="removeFavorite('${car._id}')">Remove</button>
                 </div>
             `).join('');
+            } catch (error) {
+                console.error('Error loading favorites:', error);
+                container.innerHTML = '<p>Error loading favorites. Please try again later.</p>';
+            }
+        }
+
+        async function removeFavorite(carId) {
+            try {
+                await api.removeFavorite(carId);
+                alert('Car removed from favorites!');
+                loadFavorites(); // Refresh the list
+            } catch (error) {
+                console.error('Error removing favorite:', error);
+            }
         }
         loadFavorites();
     </script>

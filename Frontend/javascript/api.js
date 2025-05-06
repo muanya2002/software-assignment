@@ -2,13 +2,13 @@
  * API service for handling all backend communication
  */
 const api = {
-    baseUrl: 'http://localhost:3000/api',
+    baseUrl: 'http://localhost:3000',
 
     
     // Authentication methods
     async registerUser(fullName, email, password) {
         try {
-            const response = await fetch(`${this.baseUrl}/auth/register`, {
+            const response = await fetch(`${this.baseUrl}/api/auth/register`, {
 
                 method: 'POST',
                 headers: {
@@ -33,7 +33,7 @@ const api = {
     
     async loginUser(email, password) {
         try {
-            const response = await fetch(`${this.baseUrl}/auth/login`, {
+            const response = await fetch(`${this.baseUrl}/api/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -55,7 +55,7 @@ const api = {
     },
     
     initiateOAuthLogin() {
-        window.location.href = `http://localhost:3000/auth/google`;
+        window.location.href = `${this.baseUrl}/auth/google`;
     },
     
     isLoggedIn() {
@@ -68,10 +68,18 @@ const api = {
     },
     
     logout() {
+        // First, call the server logout endpoint
+        fetch(`${this.baseUrl}/api/auth/logout`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${this.getToken()}`
+            }
+        }).finally(() => {
+
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         window.location.href = "../pages/index.html";
-    
+        });
 
     },
     
@@ -93,7 +101,7 @@ if (this.isLoggedIn()) {
     headers['Authorization'] = `Bearer ${this.getToken()}`;
 }
 
-const response = await fetch(`${this.baseUrl}/search?${queryParams}`, {
+const response = await fetch(`${this.baseUrl}/api/search?${queryParams}`, {
     headers
 });
 
@@ -111,7 +119,7 @@ throw error;
         console.log(`Searching for car images with query: ${encodedQuery}`);
         
         // Use the correct endpoint that matches your backend
-        const response = await fetch(`${this.baseUrl}/openverse/search?query=${encodedQuery}`);
+        const response = await fetch(`${this.baseUrl}/api/openverse/search?query=${encodedQuery}`);
         
         if (!response.ok) {
             const errorText = await response.text();
@@ -136,7 +144,7 @@ throw error;
         }
         
         // Use the correct endpoint
-        const response = await fetch(`${this.baseUrl}/openverse/cars/${id}`, { headers });
+        const response = await fetch(`${this.baseUrl}/api/openverse/cars/${id}`, { headers });
         
         if (!response.ok) {
             const errorData = await response.json();
@@ -149,58 +157,73 @@ throw error;
         throw error;
     }
 },
+getUserId() {
+    const user = JSON.parse(localStorage.getItem('user'));
+    return user.id; // or `user.id` depending on your auth payload
+  },
+  
 
   // Favorites methods
-  async saveFavorite(carId) {
+  async saveFavorite(car) {
       if (!this.isLoggedIn()) {
           throw new Error('You must be logged in to save favorites');
       }
-      
       try {
-          const response = await fetch('http://127.0.0.1:5500/Frontend/pages/favourite.html', {
-              body: JSON.stringify({ carId })
-          });
-          
-          return await response.json();
-      } catch (error) {
-          console.error('Save favorite error:', error);
-          throw error;
-      }
-  },
+        const response = await fetch(`${this.baseUrl}/api/cars/favorites`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getToken()}`
+            },
+            body: JSON.stringify({ userId: this.getUserId(),   // Make sure this returns the current user's ID
+                carId: car.carId,
+                imageUrl: car.imageUrl,
+                description: car.description
+              })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to save favorite');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Save favorite error:', error);
+        throw error;
+    }
+},
+      
   
-  async getFavorites() {
-      if (!this.isLoggedIn()) {
-          return {success: true, favorites: [] };
-      }
+async getFavorites() {
+        if (!this.isLoggedIn()) 
+            throw new Error('You must be logged in to view favorites');
       
-      try {
-          const response = await fetch('http://127.0.0.1:5500/Frontend/pages/favourite.html', {
-            body: JSON.stringify({ carId})
-          });
-          
-          return await response.json();
-      } catch (error) {
-          console.error('Get favorites error:', error);
-          throw error;
-      }
-  },
-    
+        const response = await fetch(`${this.baseUrl}/api/cars/favorites?userId=${this.getUserId()}`, {
+          headers: {
+            'Authorization': `Bearer ${this.getToken()}`
+          }
+        });
       
-      async addFavorite(carId) {
-        if (!this.isLoggedIn()) {
-          throw new Error('User must be logged in to add favorites');
-        }
-        try {
-            const response = await fetch('http://127.0.0.1:5500/Frontend/pages/favourite.html', {
-                body: JSON.stringify({ carId })
-            });
-            
-            return await response.json();
-        } catch (error) {
-            console.error('Add favorite error:', error);
-            throw error;
-        }
-    },
+        if (!response.ok) throw new Error('Failed to fetch favorites');
+        const result = await response.json();
+        return result.data;
+      },
+      
+      async removeFavorite(favoriteId) {
+        if (!this.isLoggedIn()) throw new Error('You must be logged in to remove favorites');
+      
+        const response = await fetch(`${this.baseUrl}/api/cars/favorite/${favoriteId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${this.getToken()}`
+          }
+        });
+      
+        if (!response.ok) throw new Error('Failed to remove favorite');
+      return await response.json();
+      },
+      
     
       // Car details
       async getCarDetails(carId) {
@@ -210,7 +233,7 @@ throw error;
                 headers['Authorization'] = `Bearer ${this.getToken()}`;
             }
             
-            const response = await fetch(`${this.baseUrl}/search/cars/${carId}`, { headers });
+            const response = await fetch(`${this.baseUrl}/api/search/cars/${carId}`, { headers });
             return await response.json();
         } catch (error) {
             console.error('Get car details error:', error);
@@ -230,6 +253,22 @@ throw error;
 
     clearToken() {
         localStorage.removeItem('token');
+    },
+     // Check authentication status from server
+     async checkAuthStatus() {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/auth/status`, {
+                headers: {
+                    'Authorization': `Bearer ${this.getToken()}`
+                }
+            });
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Auth status check error:', error);
+            return { success: false, isLoggedIn: false };
+        }
     }
 };
 

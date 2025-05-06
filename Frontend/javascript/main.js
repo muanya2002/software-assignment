@@ -60,7 +60,7 @@ function updateAuthUI() {
         } else {
             userSection.innerHTML = `
                 <i class="fas fa-bell"></i>
-                <a href="../pages/login.html" id="loginButton"><i class="fas fa-user-circle"></i></a>
+                <a href="/pages/login.html" id="loginButton"><i class="fas fa-user-circle"></i></a>
             `;
         }
     }
@@ -136,20 +136,20 @@ function initializeSidebar() {
 
             switch (itemText) {
                 case 'Home':
-                    window.location.href = '../pages/index.html';
+                    window.location.href = '/pages/index.html';
                     break;
                 case 'Favorites':
                     if (api.isLoggedIn()) {
-                        window.location.href = '../pages/favourite.html';
+                        window.location.href = '/pages/favourite.html';
                     } else {
-                        window.location.href = '../pages/login.html';
+                        window.location.href = '/pages/login.html';
                     }
                     break;
                 case 'Settings':
                     if (api.isLoggedIn()) {
                         window.location.href = 'settings.html';
                     } else {
-                        window.location.href = '../pages/login.html';
+                        window.location.href = '/pages/login.html';
                     }
                     break;
             }
@@ -193,7 +193,7 @@ function initializeSidebar() {
                // Add a confirmation if needed
                if (confirm('Are you sure you want to logout?')) {
                    api.logout();
-                   window.location.href = '../pages/index.html';
+                   window.location.href = '/pages/index.html';
                }
            });
        }

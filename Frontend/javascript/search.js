@@ -148,7 +148,11 @@ class SearchHandler {
                   }
                   
                   try {
-                      await api.saveFavorite(car.id);
+                      await api.saveFavorite({
+                        carId: car.id,
+                        imageUrl: car.imageUrl,
+                        description: `${car.make} ${car.model}`
+                      });
                       favoriteIconEl.className = 'fas fa-heart favorite-icon active';
                   } catch (error) {
                       console.error('Failed to save favorite:', error);

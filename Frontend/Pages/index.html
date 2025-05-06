@@ -6,24 +6,100 @@
     <title>CarSearch - Find Your Perfect Car</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
 <script>
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
-    const userId = params.get('userId');
-    const fullName = params.get('fullName');
-    const email = params.get('email');
-  
-    if (token && userId) {
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify({ id: UserId, fullName, email }));
-  
-      // Clear URL
-      window.history.replaceState({}, document.title, window.location.pathname);
+    // Handle OAuth response from URL parameters
+    document.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('token');
+        const userId = params.get('userId');
+        const fullName = params.get('fullName');
+        const email = params.get('email');
+      
+        if (token && userId) {
+            // Store auth data in localStorage
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify({ 
+                id: userId, 
+                fullName: fullName, 
+                email: email 
+            }));
+      
+            // Clear URL parameters
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            // Update UI for logged-in state
+            updateAuthUI();
+        } else {
+            // Check if user is already logged in
+            updateAuthUI();
+        }
+    });
+    
+    function updateAuthUI() {
+        const isLoggedIn = localStorage.getItem('token');
+        const user = localStorage.getItem('user');
+        const userSection = document.querySelector('.user-section');
+        
+        if (isLoggedIn && user) {
+            const userData = JSON.parse(user);
+            
+            // Update login button with user info
+            const loginButton = document.getElementById('loginButton');
+            if (loginButton) {
+                loginButton.innerHTML = `<span class="user-name">${userData.fullName}</span> <i class="fas fa-user-circle"></i>`;
+                loginButton.href = "#";  // Replace with profile page URL when available
+            }
+            
+            // Add logout button if it doesn't exist
+            if (!document.getElementById('logoutButton')) {
+                const logoutButton = document.createElement('a');
+                logoutButton.id = 'logoutButton';
+                logoutButton.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+                logoutButton.href = "#";
+                logoutButton.title = "Logout";
+                logoutButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (window.api && typeof window.api.logout === 'function') {
+                        window.api.logout();
+                    } else {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        window.location.reload();
+                    }
+                });
+                userSection.appendChild(logoutButton);
+            }
+            
+            // Show favorites link
+            const favouritesItem = document.querySelector('.sidebar-item a[href="./favourite.html"]');
+            if (favouritesItem) {
+                favouritesItem.parentElement.style.display = 'flex';
+            }
+        } else {
+            // Update for logged-out state
+            const loginButton = document.getElementById('loginButton');
+            if (loginButton) {
+                loginButton.innerHTML = '<i class="fas fa-user-circle"></i>';
+                loginButton.href = "./login.html";
+            }
+            
+            // Remove logout button if it exists
+            const logoutButton = document.getElementById('logoutButton');
+            if (logoutButton) {
+                logoutButton.remove();
+            }
+            
+            // Hide favorites link
+            const favouritesItem = document.querySelector('.sidebar-item a[href="./favourite.html"]');
+            if (favouritesItem) {
+                favouritesItem.parentElement.style.display = 'none';
+            }
+        }
     }
-  </script>
+</script>
 
 <body>
     <!-- Header -->
@@ -42,7 +118,7 @@
         </div>
         <div class="user-section">
             <i class="fas fa-bell"></i>
-            <a href="./login.html" id="loginButton"><i class="fas fa-user-circle"></i></a>
+            <a href="/login.html" id="loginButton"><i class="fas fa-user-circle"></i></a>
         </div>
     </header>
 
@@ -52,13 +128,9 @@
             <i class="fas fa-home"></i>
             <span>Home</span>
         </div>
-        <div>
-        
-            <div class="sidebar-item">
-              <i class="fas fa-heart"><a  href="./favourite.html"> </a></i>
-              <span>Favorites</span>
-            </div>
-          
+        <div class="sidebar-item">
+            <i class="fas fa-heart"></i>
+            <a href="/favourite.html">Favorites</a>
         </div>
         <div class="sidebar-item">
             <i class="fas fa-history"></i>
@@ -87,7 +159,7 @@
     <!-- Car Cards -->
     <div class="car-card">
         <div class="car-image">
-            <img src="../images/tesla-model-3-2024.webp" alt="Car 1">
+            <img src="/images/tesla-model-3-2024.webp" alt="Car 1">
         </div>
         <div class="car-details">
             <div class="car-title">2024 Tesla Model 3</div>
@@ -97,7 +169,7 @@
 
     <div class="car-card">
         <div class="car-image">
-            <img src="../images/BMW-X5-2024.jpg" alt="Car 2">
+            <img src="/images/BMW-X5-2024.jpg" alt="Car 2">
         </div>
         <div class="car-details">
             <div class="car-title">2024 BMW X5</div>
@@ -107,7 +179,7 @@
 
     <div class="car-card">
         <div class="car-image">
-            <img src="../images/2024-Honda-Accord.png" alt="Car 3">
+            <img src="/images/2024-Honda-Accord.png" alt="Car 3">
         </div>
         <div class="car-details">
             <div class="car-title">2024 Honda Accord</div>
@@ -117,7 +189,7 @@
     
     <div class="car-card">
         <div class="car-image">
-            <img src="../images/2024-Porsche-911.png" alt="Car 4">
+            <img src="/images/2024-Porsche-911.png" alt="Car 4">
         </div>
         <div class="car-details">
             <div class="car-title">2024 Porsche 911</div>
@@ -129,18 +201,8 @@
 <div id="carResults"></div>
 
 </main>
-<script src="../javascript/api.js"></script>
-<script src="../javascript/search.js"></script>
-<script src="../javascript/main.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const isLoggedIn = api.isLoggedIn();
-      const favoritesLink = document.getElementById('favoritesLink');
-  
-      if (isLoggedIn && favoritesLink) {
-        favoritesLink.style.display = 'block';
-      }
-    });
-  </script>
-  
+<script src="/javascript/api.js"></script>
+<script src="/javascript/search.js"></script>
+<script src="/javascript/main.js"></script>
+</body>
 </html>
