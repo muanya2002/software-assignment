@@ -134,7 +134,7 @@ class AuthController {
         );
     
         // ✅ Redirect to your frontend with user info and token
-        res.redirect(`http://127.0.0.1:5500/Frontend/pages/index.html?token=${token}&userId=${user._id}`);
+        res.redirect(`http://127.0.0.1:5500/frontend/pages/index.html?token=${token}&userId=${user._id}&fullName=${encodeURIComponent(user.fullName)}&email=${encodeURIComponent(user.email)}`);
       } catch (error) {
         console.error('Google OAuth login error:', error);
         res.status(500).json({

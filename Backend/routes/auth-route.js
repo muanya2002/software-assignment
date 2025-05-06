@@ -27,7 +27,7 @@ router.post('/login', async (req, res) => {
     }
     
     // Check password
-    const isMatch = bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ 
         success: false, 
@@ -53,6 +53,7 @@ router.post('/login', async (req, res) => {
     res.json({
       success: true,
       message: 'Login successful',
+      token: token,
       user: {
         id: user._id,
         fullName: user.fullName,
@@ -69,16 +70,13 @@ router.post('/login', async (req, res) => {
 });
 
 // Google OAuth login route
-router.get('/auth/google', 
-  passport.authenticate('google', {
-  // This will be handled by Passport middleware
-scope:['profile' , 'email']
-}));
+router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 // Google OAuth callback route
 router.get('/auth/google/callback', 
-  passport.authenticate('google' , {failureRedirect: '/login' }),
-  AuthController.googleOAuthLogin
+  passport.authenticate('google' , {
+    successRedirect: '/pages/index.html', // Updated successRedirect URL
+    failureRedirect: '/pages/login.html' }), // Updated failureRedirect URL
 
   // This will be handled by Passport middleware
 );

@@ -26,4 +26,4 @@ export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 export const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/auth/google/callback';
 
 // CORS configuration
-export const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:8080';
+export const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000';

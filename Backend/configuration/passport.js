@@ -3,6 +3,7 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as LocalStrategy } from 'passport-local';
 import  User  from '../models/user-model.js';
+import { compare } from 'bcrypt';
 import dotenv from 'dotenv';
 
 // Load environment variables
@@ -48,7 +49,7 @@ passport.use(new LocalStrategy(
             }
             
             // Check password
-            const isMatch = await compare(password, user.password);
+            const isMatch = await bcrypt.compare(password, user.password);
             
             if (!isMatch) {
                 return done(null, false, { message: 'Incorrect password.' });
@@ -66,10 +67,11 @@ passport.use(new LocalStrategy(
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/auth/google/callback',
+    callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/api/auth/google/callback',
+    passReqToCallback: true
    
 }, 
- async (accessToken, refreshToken, profile, done) => {
+ async (_req, _accessToken, _refreshToken, profile, done) => {
 try {
     console.log("Google profile:", profile);
     // Check if user already exists in the database
@@ -98,8 +100,8 @@ export const passportConfig = {
     
     // Authenticate locally
     authenticateLocal: passport.authenticate('local', {
-        successRedirect: 'http://127.0.0.1:5500/Frontend/pages/index.html',
-        failureRedirect: 'http://127.0.0.1:5500/Frontend/pages/login.html',
+        successRedirect: 'http://127.0.0.1:3000/pages/index.html',
+        failureRedirect: 'http://127.0.0.1:3000/pages/login.html',
         failureFlash: true
     }),
     
@@ -110,8 +112,8 @@ export const passportConfig = {
     
     // Google OAuth callback handler
     googleCallback: passport.authenticate('google', {
-        successRedirect: 'http://127.0.0.1:5500/Frontend/pages/index.html',
-        failureRedirect: 'http://127.0.0.1:5500/Frontend/pages/login.html',
+        successRedirect: 'http://127.0.0.1:3000/pages/index.html',
+        failureRedirect: 'http://127.0.0.1:3000/pages/login.html',
     }),
     
     // Middleware to check if user is authenticated

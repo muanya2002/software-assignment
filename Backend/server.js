@@ -1,13 +1,13 @@
 import express from 'express';
-import { static as serveStatic } from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import {passportConfig} from '../Backend/configuration/passport.js';
+import  '../Backend/configuration/passport.js';
 import session from 'express-session';
 import passport from 'passport';
-import { JWT_SECRET, OPENVERSE_API_URL } from '../Backend/configuration/config.js';
+import { passportConfig } from '../Backend/configuration/passport.js';
 import { config } from 'dotenv';
-
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 import authRoutes from './routes/auth-route.js';
 import searchRoutes from './routes/search-routes.js';    
@@ -18,15 +18,21 @@ import openverseRoutes from './routes/openverse-routes.js';
 // Load environment variables
 config();
 
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://127.0.1:5500',
+    origin: process.env.FRONTEND_URL || 'http://127.0.0.1:3000',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your_session_secret',
     resave: false,
@@ -37,6 +43,21 @@ app.use(session({
 // Initialize Passport
 app.use(passportConfig.initialize());
 app.use(passportConfig.session());
+
+
+// 🧩 Serve static files from correct subfolders
+const frontendDir = path.join(__dirname, '../Frontend');
+app.use('/css', express.static(path.join(frontendDir, 'css')));
+app.use('/javascript', express.static(path.join(frontendDir, 'javascript')));
+app.use('/images', express.static(path.join(frontendDir, 'images')));
+app.use('/pages', express.static(path.join(frontendDir, 'pages')));
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/search', searchRoutes);
+app.use('/api/favorites', favoritesRoutes);
+app.use('/api/openverse', openverseRoutes);
+app.use('/api/cars', carRoutes);
 
 // MongoDB connection
 mongoose.set('strictQuery', false);
@@ -52,23 +73,20 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/carSearch
     console.error('MongoDB connection error:', err);
 });
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/search', searchRoutes);
-app.use('/api/favorites', favoritesRoutes);
-app.use('/api/openverse', openverseRoutes);
-app.use('/api/cars', carRoutes);
 
-app.get('/auth/google', passport.authenticate('google', {scope: ['profile', 'email']}));
-app.get('/auth/google/callback', passport.authenticate('google', { 
-    failureRedirect: '../Frontend/pages/login.html' ,
-    session: false
-}), (req, res) => {
-    const token = req.user.generateAuthToken();
-    res.redirect(`${process.env.FRONTEND_URL || 'http://127.0.0.1:5500'}/pages/index.html?token=${token}`);
+
+// Serve HTML files from /pages
+app.get(['/', '/pages/:page'], (req, res) => {
+    const page = req.params.page || 'index.html';
+    const filePath = path.join(frontendDir, 'pages', page);
+
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.error(`File not found: ${filePath}`);
+            res.status(404).send('Page not found');
+        }
+    });
 });
-
-app.use(serveStatic('public'));
 
 
 // Error handler middleware
